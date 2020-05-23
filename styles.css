@@ -48,5 +48,13 @@ h1 {
 .slider-container .nav-btn.prev {
   left: -80px;
 }
+.slider-container .slider-progress-bar {
+  position: absolute;
+  width: 0%;
+  transition: width 0.6s ease-in-out;
+  height: 4px;
+  bottom: -4px;
+  background: #d22a2a;
+}
 
 /*# sourceMappingURL=styles.css.map */

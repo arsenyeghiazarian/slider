@@ -52,4 +52,13 @@ h1 {
   .nav-btn.prev {
     left: -80px;
   }
+
+  .slider-progress-bar {
+    position: absolute;
+    width: 0%;
+    transition: width .6s ease-in-out;
+    height: 4px;
+    bottom: -4px;
+    background: #d22a2a;
+  }
 }

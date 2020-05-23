@@ -6,47 +6,74 @@ let autoPlayInterval = 3000;
 let loop = false;
 let isAutoPlay = false;
 let slideChangeSpeed = 1;
+let hasProgressBar = true;
+let slideCount = document.getElementById('slider-id').children.length
 let form = document.getElementById('slider-options');
+let progressWidth = 100/slideCount;
 
+// get the sum of widths of all slides
 for(let el of document.getElementById('slider-id').children) {
-    sliderInnerWidth += el.offsetWidth
-    slideWidth = el.offsetWidth
+    sliderInnerWidth += el.offsetWidth;
+    slideWidth = el.offsetWidth;
 }
 
+// set first slide position and slider inner width
 if(sliderInnerWidth) {
     document.getElementById('slider-id').style.width = sliderInnerWidth + 'px'
     document.getElementById('slider-id').style.transform = `translate3d( ${slidingSize}px, 0, 0)`
 }
-refreshSlider()
 
+// set progress bar width on load
+function progressBarWidth(state) {
+    if(state === 'next') {
+        if(progressWidth === 100) {
+            progressWidth = 0;
+        } else {
+            progressWidth += 100 / slideCount;
+        }
+    }
+    if(state === 'prev') {
+        progressWidth -= 100 / slideCount;
+    }
+    document.getElementById('progressBar').style.width = `${progressWidth}%`
+}
+
+// detect form change
 form.addEventListener("input", function () {
     loop = document.getElementById('loop').checked
     isAutoPlay = document.getElementById('autoplay').checked
     autoPlayInterval = document.getElementById('autoPlayInterval').value
     slideChangeSpeed = document.getElementById('slideChangeSpeed').value
-    refreshSlider()
+    hasProgressBar = document.getElementById('progress-checkbox').checked
+    if(isAutoPlay) {
+        document.getElementById('loop').checked = true
+        hasProgressBar = false
+    }
+    setSliderOption()
 });
 
-let nextSlide = function() {
-    if(slidingSize === -sliderInnerWidth + slideWidth) {
-        slidingSize = 0;
-    } else {
-        slidingSize -= slideWidth;
+// navigation buttons
+let changeSlide = function(state) {
+    if(state === 'next') {
+        if(slidingSize === -sliderInnerWidth + slideWidth) {
+            slidingSize = 0;
+        } else {
+            slidingSize -= slideWidth;
+        }
+        progressBarWidth(state)
+    } else if (state === 'prev') {
+        if(slidingSize === 0) {
+            slidingSize = -sliderInnerWidth + slideWidth;
+        } else {
+            slidingSize += slideWidth
+        }
+        progressBarWidth(state)
     }
     sliderBtnState()
     document.getElementById('slider-id').style.transform = `translate3d( ${slidingSize}px, 0, 0)`
 }
 
-let prevSlide = function() {
-    if(slidingSize === 0) {
-        slidingSize = -sliderInnerWidth + slideWidth;
-    } else {
-        slidingSize += slideWidth
-    }
-    sliderBtnState()
-    document.getElementById('slider-id').style.transform = `translate3d( ${slidingSize}px, 0, 0)`
-}
-
+// to check when buttons should be disabled
 function sliderBtnState() {
     if(loop === false && slidingSize === -sliderInnerWidth + slideWidth) {
         document.getElementById('next-btn').disabled = true;
@@ -61,11 +88,12 @@ function sliderBtnState() {
     }
 }
 
+// autoplay functionality
 function autoplay() {
-    setIntervalId = setInterval(() => nextSlide(), +autoPlayInterval)
+    setIntervalId = setInterval(() => changeSlide('next'), +autoPlayInterval)
 }
 
-function refreshSlider() {
+function setSliderOption() {
     clearInterval(setIntervalId)
     if(isAutoPlay) {
         autoplay()
@@ -74,6 +102,14 @@ function refreshSlider() {
         document.getElementById('autoPlayInterval').setAttribute('readonly', 'true')
         clearInterval(setIntervalId)
     }
+    if(hasProgressBar) {
+        document.getElementById('progressBar').style.display = 'block'
+    } else {
+        document.getElementById('progressBar').style.display = 'none'
+    }
     document.getElementById('slider-id').style.transition = `all ${slideChangeSpeed}s ease 0s`
     sliderBtnState()
+    progressBarWidth()
 }
+progressBarWidth()
+setSliderOption();
